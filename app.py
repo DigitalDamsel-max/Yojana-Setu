@@ -1,4 +1,3 @@
-from flask_babel import Babel, gettext as _
 from datetime import timedelta
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -10,27 +9,6 @@ print("FLASK RUNNING ON:", socket.gethostname())
 app = Flask(__name__)
 app.secret_key = "yojanasetu_secret_key"
 app.permanent_session_lifetime = timedelta(minutes=60)
-
-from translations_ui import translations_ui
-
-@app.context_processor
-def inject_translator():
-    lang = session.get("lang","en")
-    return dict(t=lambda key: translations_ui[lang].get(key,key))
-
-
-app.config['BABEL_DEFAULT_LOCALE'] = 'en'
-app.config['BABEL_SUPPORTED_LOCALES'] = ['en','hi']
-
-def get_locale():
-    return session.get('lang', 'en')
-
-babel = Babel(app, locale_selector=get_locale)
-
-@app.route("/set-language/<lang>")
-def set_language(lang):
-    session['lang'] = lang
-    return redirect(request.referrer or "/")
 
 
 # ---------- HOME ----------

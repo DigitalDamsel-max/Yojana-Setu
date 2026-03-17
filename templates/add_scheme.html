@@ -84,38 +84,3 @@
 </div>
 {% endblock %}
 
-
-<!-- <!DOCTYPE html>
-<html>
-<head>
-  <title>Admin | Manage Schemes</title>
-</head>
-<body>
-
-<h2>Add New Scheme</h2>
-
-<form method="POST">
-  <input type="text" name="scheme_name" placeholder="Scheme Name" required><br><br>
-  <textarea name="description" placeholder="Description" required></textarea><br><br>
-  <input type="number" name="min_income" placeholder="Min Income" required><br><br>
-  <input type="number" name="max_income" placeholder="Max Income" required><br><br>
-  <input type="text" name="category" placeholder="Category" required><br><br>
-  <button type="submit">Add Scheme</button>
-</form>
-
-<hr>
-
-<h2>Existing Schemes</h2>
-
-{% for s in schemes %}
-  <div style="border:1px solid #ccc; padding:10px; margin-bottom:8px;">
-    <b>{{ s.scheme_name }}</b> ({{ s.category }})<br>
-    ₹{{ s.min_income }} – ₹{{ s.max_income }}<br>
-
-    <a href="/edit_scheme/{{ s.id }}">Edit</a> |
-    <a href="/delete_scheme/{{ s.id }}">Delete</a>
-  </div>
-{% endfor %}
-
-</body>
-</html> -->
