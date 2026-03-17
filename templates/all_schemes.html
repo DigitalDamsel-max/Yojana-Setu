@@ -10,7 +10,7 @@
   <div class="section-header">
     <div>
       <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Complete Directory</span></div>
-      <h2 class="section-title" style="margin-bottom:0;">{{_("All Schemes") }} <span class="scheme-count">({{ schemes|length }})</span></h2>
+      <h2 class="section-title" style="margin-bottom:0;"> All Schemes </span></h2>
     </div>
   </div>
 
@@ -20,7 +20,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input type="text" id="searchInput" placeholder="{{ _('Search schemes by name or description') }}">
+      <input type="text" id="searchInput" placeholder="Search schemes by name or description">
     </div>
     <div class="filter-tabs">
       <button class="filter-tab active" data-cat="all">All</button>
@@ -74,7 +74,7 @@
   {% else %}
   <div class="empty-state">
     <div class="empty-icon">📭</div>
-    <h2>{{ _("No schemes available yet") }}</h2>
+    <h2> No schemes available yet </h2>
     <p>Check back soon — new schemes are added regularly.</p>
     <a href="/" class="btn-primary" style="margin-top:24px; display:inline-flex;">Go Home</a>
   </div>
