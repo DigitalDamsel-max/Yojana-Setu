@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Your Eligible Schemes — Yojana Setu{% endblock %}
+
+{% block content %}
+<div class="home-content">
+  <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Personalised Results</span></div>
+
+  {% if schemes %}
+    <h2 class="section-title">You are eligible for {{ schemes|length }} scheme{{ 's' if schemes|length != 1 }}</h2>
+    <div class="schemes-grid">
+      {% for s in schemes %}
+      <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}" class="scheme-card eligible">
+        <div class="card-top">
+          <div class="scheme-icon health">🏛</div>
+          <span class="badge-eligible">Eligible</span>
+        </div>
+        <div class="scheme-info">
+          <h3>{{ s.scheme_name }}</h3>
+          <p>{{ s.description }}</p>
+        </div>
+        <div class="scheme-footer">
+          <span class="scheme-link">View Details ›</span>
+          {% if s.official_url %}
+            <a href="{{ s.official_url }}" target="_blank" class="scheme-ext-link" onclick="event.stopPropagation()">Official Site ↗</a>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h2>No schemes found</h2>
+      <p>We couldn't find any schemes matching your profile right now. Try changing your category or check back later as new schemes are added regularly.</p>
+      <a href="/check-eligibility" class="btn-primary" style="margin-top:24px; display:inline-flex;">Try Again</a>
+    </div>
+  {% endif %}
+
+  <div style="text-align:center; margin-top:40px;">
+    <a href="/check-eligibility" class="btn-outline">← Check Again with Different Details</a>
+  </div>
+</div>
+{% endblock %}
+
+
+

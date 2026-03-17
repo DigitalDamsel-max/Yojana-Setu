@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ cat | capitalize }} Schemes — Yojana Setu{% endblock %}
+
+{% block content %}
+<div class="home-content">
+  <a href="/" class="back-link">← Back to Home</a>
+  <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Category</span></div>
+  <h2 class="section-title">{{ cat | capitalize }} Schemes</h2>
+
+  {% if schemes %}
+  <div class="schemes-grid">
+    {% for s in schemes %}
+    <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}" class="scheme-card">
+      <div class="card-top">
+        <div class="scheme-icon health">🏛</div>
+        <span class="scheme-tag tag-popular">{{ s.category | capitalize }}</span>
+      </div>
+      <div class="scheme-info">
+        <h3>{{ s.scheme_name }}</h3>
+        <p>{{ s.description }}</p>
+      </div>
+      <div class="scheme-footer">
+        <span class="scheme-link">Learn more ›</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h2>No schemes in this category</h2>
+      <p>Check back soon — new schemes are added regularly.</p>
+      <a href="/" class="btn-primary" style="margin-top:24px; display:inline-flex;">Go Home</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

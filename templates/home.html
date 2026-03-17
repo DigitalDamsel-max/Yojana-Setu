@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Yojana Setu — Find Schemes You Deserve{% endblock %}
+<!-- <div class="lang-switch">
+  <a href="/set-language/en">ENGLISH</a> |
+  <a href="/set-language/hi">हिंदी</a>
+</div> -->
+{% block content %}
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-rings">
+    <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+    <div class="glow-a"></div><div class="glow-b"></div>
+  </div>
+  <div class="hero-content">
+    <!-- <div class="hero-pill"><div class="pulse-dot"></div> 500+ Active Schemes</div> -->
+    <h1 class="hero-title">Find Schemes<br><em>You Deserve</em></h1>
+    <p class="hero-body">Answer a few simple questions and instantly discover every government scheme you are eligible for — across health, farming, education &amp; more.</p>
+    <div class="hero-actions">
+      <a href="/check-eligibility" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/>
+        </svg>
+        Check My Eligibility
+      </a>
+      <span class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Takes under 2 minutes
+      </span>
+    </div>
+  </div>
+
+  <div class="hero-panel">
+    <p class="panel-label">Popular Schemes</p>
+    {% for s in popular_schemes %}
+    <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}" class="mini-scheme">
+      <div class="mini-icon health">🏛</div>
+      <div class="mini-info">
+        <h4>{{ s.scheme_name }}</h4>
+        <p>{{ s.description[:55] }}…</p>
+      </div>
+      <span class="mini-arrow">›</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <!-- <div class="stat-item"><span class="stat-icon">📋</span><div><div class="stat-num">500+</div><div class="stat-lbl">Active Schemes</div></div></div> -->
+    <div class="stat-item"><span class="stat-icon">💰</span><div><div class="stat-num">₹80K Cr</div><div class="stat-lbl">Distributed</div></div></div>
+    <div class="stat-item"><span class="stat-icon">👥</span><div><div class="stat-num">12 Cr+</div><div class="stat-lbl">Beneficiaries</div></div></div>
+    <div class="stat-item"><span class="stat-icon">🏦</span><div><div class="stat-num">28</div><div class="stat-lbl">Ministries</div></div></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="home-content">
+
+  <!-- Popular Schemes -->
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Most Accessed</span></div>
+      <h2 class="section-title" style="margin-bottom:0;">Popular Schemes</h2>
+    </div>
+    <a href="/all-schemes" class="btn-outline">
+      View All Schemes
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </a>
+  </div>
+  <div class="schemes-grid" style="margin-top:24px;">
+    {% for s in popular_schemes %}
+    <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}" class="scheme-card {% if s.eligible %}eligible{% endif %}">
+      <div class="card-top">
+        <div class="scheme-icon health">🏛</div>
+        {% if s.eligible %}
+          <span class="badge-eligible">Eligible</span>
+        {% else %}
+          <span class="scheme-tag tag-popular">Popular</span>
+        {% endif %}
+      </div>
+      <div class="scheme-info">
+        <h3>{{ s.scheme_name }}</h3>
+        <p>{{ s.description }}</p>
+      </div>
+      <div class="scheme-footer">
+        <span class="scheme-link">Learn more ›</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Lower Grid -->
+  <div class="lower-grid">
+    <div class="info-card">
+      <div class="card-header"><div class="card-header-icon">🆕</div><h3>Recently Launched</h3></div>
+      <ul>
+        {% for s in recent_schemes %}
+          <li>
+            <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}">
+              {{ s.scheme_name }} <span class="li-arrow">›</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="info-card">
+      <div class="card-header"><div class="card-header-icon">📂</div><h3>Browse by Category</h3></div>
+      <ul>
+        <li><a href="/category/health">Health &amp; Insurance <span class="li-arrow">›</span></a></li>
+        <li><a href="/category/agriculture">Agriculture &amp; Farmers <span class="li-arrow">›</span></a></li>
+        <li><a href="/category/education">Education &amp; Scholarships <span class="li-arrow">›</span></a></li>
+        <li><a href="/category/women">Women &amp; Child Welfare <span class="li-arrow">›</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div class="bottom-cta">
+    <div class="cta-glow"></div>
+    <div class="cta-text">
+      <h3>Not Sure Where to <em>Start?</em></h3>
+      <p>Let us match you with the right schemes in under 2 minutes. No paperwork, no jargon.</p>
+    </div>
+    <div class="cta-action">
+      <a href="/check-eligibility" class="btn-primary">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Find My Schemes
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

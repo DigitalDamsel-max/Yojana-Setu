@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Yojana Setu{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="tricolor-bar"></div>
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <div class="brand-emblem">
+        <div class="circle-outer"></div>
+        <div class="inner-circle">🏛</div>
+      </div>
+      <div>
+        <span class="brand-name">Yojana Setu</span>
+        <span class="brand-sub">Government of India</span>
+      </div>
+    </a>
+    <nav>
+      <a href="/all-schemes" class="nav-link">All Schemes</a>
+      {% if session.get("user_id") %}
+        {% if session.get("user_id") == 1 %}
+          <a href="/admin/add-scheme" class="nav-link">Admin</a>
+        {% endif %}
+        <a href="/logout" class="nav-login">Logout</a>
+      {% else %}
+        <a href="/login" class="nav-login">Login</a>
+        <a href="/register" class="nav-register">Register</a>
+      {% endif %}
+      <div class="lang-switch">
+        <a href="{{ url_for('set_language', lang='en') }}">English</a>
+        <a href="{{ url_for('set_language', lang='hi') }}">हिंदी</a>
+      </div>
+      <div id="google_translate_element" style="display:none"></div>
+    </nav>
+  </div>
+</header>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<main class="page-main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>© 2025 <span>Yojana Setu</span> &nbsp;·&nbsp; Empowering every citizen with access to government benefits.</p>
+    <div class="footer-flag">
+      <div class="flag-strip" style="background:#E8722A"></div>
+      <div class="flag-strip" style="background:#fff"></div>
+      <div class="flag-strip" style="background:#2D6A4F"></div>
+      &nbsp; Made in India
+    </div>
+  </div>
+</footer>
+
+<script>
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement(
+    {pageLanguage: 'en', includedLanguages: 'en,hi'},
+    'google_translate_element'
+  );
+}
+</script>
+
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+<script>
+function translateLang(lang) {
+  var domain = window.location.hostname;
+  document.cookie = "googtrans=/en/" + lang + ";path=/";
+  document.cookie = "googtrans=/en/" + lang + ";domain=" + domain + ";path=/";
+  location.reload();
+}
+</script>
+</body>
+</html>

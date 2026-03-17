@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Login — Yojana Setu{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon">🔐</div>
+      <h2>Welcome Back</h2>
+      <p>Login to track your eligible schemes</p>
+    </div>
+
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn-primary btn-full">Login</button>
+    </form>
+
+    <p class="auth-switch">Don't have an account? <a href="/register">Register here</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}All Schemes — Yojana Setu{% endblock %}
+
+{% block content %}
+<div class="home-content">
+
+  <a href="/" class="back-link">← Back to Home</a>
+
+  <!-- Header -->
+  <div class="section-header">
+    <div>
+      <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Complete Directory</span></div>
+      <h2 class="section-title" style="margin-bottom:0;">{{_("All Schemes") }} <span class="scheme-count">({{ schemes|length }})</span></h2>
+    </div>
+  </div>
+
+  <!-- Search + Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="searchInput" placeholder="{{ _('Search schemes by name or description') }}">
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-cat="all">All</button>
+      <button class="filter-tab" data-cat="health">Health</button>
+      <button class="filter-tab" data-cat="agriculture">Agriculture</button>
+      <button class="filter-tab" data-cat="education">Education</button>
+      <button class="filter-tab" data-cat="women">Women</button>
+      <button class="filter-tab" data-cat="housing">Housing</button>
+      <button class="filter-tab" data-cat="employment">Employment</button>
+    </div>
+  </div>
+
+  <!-- Schemes Grid -->
+  {% if schemes %}
+  <div class="schemes-grid" id="schemesGrid">
+    {% for s in schemes %}
+    <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}"
+       class="scheme-card {% if s.eligible %}eligible{% endif %}"
+       data-name="{{ s.scheme_name | lower }}"
+       data-desc="{{ s.description | lower }}"
+       data-cat="{{ s.category | lower }}">
+      <div class="card-top">
+        <div class="scheme-icon health">🏛</div>
+        {% if s.eligible %}
+          <span class="badge-eligible">Eligible</span>
+        {% else %}
+          <span class="scheme-tag tag-popular">{{ s.category | capitalize }}</span>
+        {% endif %}
+      </div>
+      <div class="scheme-info">
+        <h3>{{ s.scheme_name }}</h3>
+        <p>{{ s.description }}</p>
+      </div>
+      <div class="scheme-footer">
+        <span class="scheme-link">Learn more ›</span>
+        {% if s.official_url %}
+          <a href="{{ s.official_url }}" target="_blank" class="scheme-ext-link" onclick="event.stopPropagation()">Official ↗</a>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- No results message (hidden by default) -->
+  <div class="empty-state" id="noResults" style="display:none;">
+    <div class="empty-icon">🔍</div>
+    <h2>No schemes found</h2>
+    <p>Try a different search term or category filter.</p>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📭</div>
+    <h2>{{ _("No schemes available yet") }}</h2>
+    <p>Check back soon — new schemes are added regularly.</p>
+    <a href="/" class="btn-primary" style="margin-top:24px; display:inline-flex;">Go Home</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const filterTabs  = document.querySelectorAll('.filter-tab');
+  const cards       = document.querySelectorAll('#schemesGrid .scheme-card');
+  const noResults   = document.getElementById('noResults');
+  const grid        = document.getElementById('schemesGrid');
+
+  let activeCategory = 'all';
+
+  function filterCards() {
+    const query = searchInput.value.toLowerCase().trim();
+    let visible = 0;
+
+    cards.forEach(card => {
+      const name    = card.dataset.name || '';
+      const desc    = card.dataset.desc || '';
+      const cat     = card.dataset.cat  || '';
+      const matchCat    = activeCategory === 'all' || cat === activeCategory;
+      const matchSearch = !query || name.includes(query) || desc.includes(query);
+
+      if (matchCat && matchSearch) {
+        card.style.display = 'block';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    if (noResults && grid) {
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+      grid.style.display      = visible === 0 ? 'none'  : 'grid';
+    }
+  }
+
+  searchInput.addEventListener('input', filterCards);
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeCategory = tab.dataset.cat;
+      filterCards();
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Edit Scheme</h2>
+
+<form method="POST">
+  <input name="scheme_name" value="{{ scheme.scheme_name }}"><br><br>
+  <textarea name="description">{{ scheme.description }}</textarea><br><br>
+  <input name="min_income" value="{{ scheme.min_income }}"><br><br>
+  <input name="max_income" value="{{ scheme.max_income }}"><br><br>
+  <input name="category" value="{{ scheme.category }}"><br><br>
+  <button type="submit">Update</button>
+</form>
+
+</body>
+</html>

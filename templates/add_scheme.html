@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Admin — Manage Schemes{% endblock %}
+
+{% block content %}
+<div class="home-content">
+  <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Admin Panel</span></div>
+  <h2 class="section-title">Manage Schemes</h2>
+
+  <!-- Add Form -->
+  <div class="info-card" style="margin-bottom:32px;">
+    <div class="card-header"><div class="card-header-icon">➕</div><h3>Add New Scheme</h3></div>
+    <form method="POST" action="/admin/add-scheme" class="admin-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Scheme Name</label>
+          <input type="text" name="scheme_name" placeholder="e.g. PM Kisan Samman Nidhi" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" required>
+            <option value="all">All</option>
+            <option value="health">Health</option>
+            <option value="agriculture">Agriculture</option>
+            <option value="education">Education</option>
+            <option value="women">Women</option>
+            <option value="housing">Housing</option>
+            <option value="employment">Employment</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Describe the scheme..." required></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Min Income (₹)</label>
+          <input type="number" name="min_income" placeholder="0" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Max Income (₹)</label>
+          <input type="number" name="max_income" placeholder="500000" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Official URL</label>
+          <input type="url" name="official_url" placeholder="https://...">
+        </div>
+      </div>
+      <button type="submit" class="btn-primary">Add Scheme</button>
+    </form>
+  </div>
+
+  <!-- Existing Schemes Table -->
+  <div class="info-card">
+    <div class="card-header"><div class="card-header-icon">📋</div><h3>All Schemes ({{ schemes|length }})</h3></div>
+    {% if schemes %}
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>Category</th><th>Income Range</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in schemes %}
+          <tr>
+            <td>{{ s.id }}</td>
+            <td><strong>{{ s.scheme_name }}</strong></td>
+            <td><span class="scheme-tag tag-popular">{{ s.category }}</span></td>
+            <td>₹{{ "{:,}".format(s.min_income) }} – ₹{{ "{:,}".format(s.max_income) }}</td>
+            <td class="action-btns">
+              <a href="/admin/edit/{{ s.id }}" class="btn-edit">Edit</a>
+              <a href="/admin/delete/{{ s.id }}" class="btn-delete" onclick="return confirm('Delete {{ s.scheme_name }}?')">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p style="color:var(--ink-soft); padding:16px 0;">No schemes added yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Admin | Manage Schemes</title>
+</head>
+<body>
+
+<h2>Add New Scheme</h2>
+
+<form method="POST">
+  <input type="text" name="scheme_name" placeholder="Scheme Name" required><br><br>
+  <textarea name="description" placeholder="Description" required></textarea><br><br>
+  <input type="number" name="min_income" placeholder="Min Income" required><br><br>
+  <input type="number" name="max_income" placeholder="Max Income" required><br><br>
+  <input type="text" name="category" placeholder="Category" required><br><br>
+  <button type="submit">Add Scheme</button>
+</form>
+
+<hr>
+
+<h2>Existing Schemes</h2>
+
+{% for s in schemes %}
+  <div style="border:1px solid #ccc; padding:10px; margin-bottom:8px;">
+    <b>{{ s.scheme_name }}</b> ({{ s.category }})<br>
+    ₹{{ s.min_income }} – ₹{{ s.max_income }}<br>
+
+    <a href="/edit_scheme/{{ s.id }}">Edit</a> |
+    <a href="/delete_scheme/{{ s.id }}">Delete</a>
+  </div>
+{% endfor %}
+
+</body>
+</html> -->
