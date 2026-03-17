@@ -27,4 +27,3 @@ This project aims to simplify access to government welfare schemes by helping us
 - Add chatbot to resolve user queries
 - Expand scheme database
 - Email verification
-- Add multi-lingual support
