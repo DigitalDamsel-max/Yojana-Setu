@@ -6,6 +6,8 @@ YojanaSetu is a web-based tool that helps users check their eligibility for vari
 ![Home Page](assets/images/home1.png) & ![Home Page](assets/images/home2.png)
 ![All Schemes Page](assets/images/schemes.png)
 ![Scheme Card Page](assets/images/scheme-card.png)
+![Eligibility Tester Page](assets/images/eligibility.png)
+
 
 ## Features
 - User-friendly interface
