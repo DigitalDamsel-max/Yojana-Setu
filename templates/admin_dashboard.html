@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — Yojana Setu{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div class="admin-brand-icon">⚙️</div>
+      <div>
+        <div class="admin-brand-title">Admin Panel</div>
+        <div class="admin-brand-sub">Yojana Setu</div>
+      </div>
+    </div>
+
+    <nav class="admin-nav">
+      <div class="theme-section">
+        <span class="theme-section-label">Mode</span>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="modeLight" onclick="setMode('light')">☀️ Light</button>
+          <button class="mode-btn" id="modeDark" onclick="setMode('dark')">🌙 Dark</button>
+        </div>
+      </div>
+      <a href="/admin" class="admin-nav-item {% if request.path == '/admin' %}active{% endif %}">
+        <span class="admin-nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="/all-schemes" class="admin-nav-item">
+        <span class="admin-nav-icon">📋</span> All Schemes
+      </a>
+      <a href="/admin/add-scheme" class="admin-nav-item">
+        <span class="admin-nav-icon">➕</span> Add Scheme
+      </a>
+      <a href="/" class="admin-nav-item">
+        <span class="admin-nav-icon">🌐</span> Visit Site
+      </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <div class="admin-user-info">
+        <div class="admin-user-avatar">👤</div>
+        <div>
+          <div class="admin-user-name">Administrator</div>
+          <div class="admin-user-role">Super Admin</div>
+        </div>
+      </div>
+      <a href="/logout" class="admin-logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+
+    <!-- Top bar -->
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-page-eyebrow">Overview</div>
+        <h1 class="admin-page-title">All Schemes</h1>
+      </div>
+      <a href="/admin/add-scheme" class="btn-primary">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add New Scheme
+      </a>
+    </div>
+
+    <!-- Stats row -->
+    <div class="admin-stats-row">
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon">📋</div>
+        <div>
+          <div class="admin-stat-num">{{ schemes|length }}</div>
+          <div class="admin-stat-lbl">Total Schemes</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon">✅</div>
+        <div>
+          <div class="admin-stat-num">{{ schemes|selectattr('is_active')|list|length if schemes else 0 }}</div>
+          <div class="admin-stat-lbl">Active Schemes</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon">🏷️</div>
+        <div>
+          <div class="admin-stat-num">{{ schemes|map(attribute='category')|unique|list|length if schemes else 0 }}</div>
+          <div class="admin-stat-lbl">Categories</div>
+        </div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-icon">👥</div>
+        <div>
+          <div class="admin-stat-num">12 Cr+</div>
+          <div class="admin-stat-lbl">Beneficiaries</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h2 class="admin-card-title">Scheme Directory</h2>
+        <!-- Search -->
+        <div class="admin-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="adminSearch" placeholder="Search schemes…" oninput="filterTable()">
+        </div>
+      </div>
+
+      {% if schemes %}
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="adminTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Scheme Name</th>
+              <th>Category</th>
+              <th>Income Range</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in schemes %}
+            <tr>
+              <td class="admin-td-id">#{{ s.id }}</td>
+              <td>
+                <div class="admin-scheme-name">{{ s.scheme_name }}</div>
+                <div class="admin-scheme-desc">{{ s.description[:60] }}…</div>
+              </td>
+              <td><span class="admin-category-badge">{{ s.category | capitalize }}</span></td>
+              <td class="admin-td-range">₹{{ "{:,}".format(s.min_income) }} – ₹{{ "{:,}".format(s.max_income) }}</td>
+              <td>
+                {% if s.is_active %}
+                  <span class="admin-status active">● Active</span>
+                {% else %}
+                  <span class="admin-status inactive">● Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="admin-actions">
+                  <a href="/scheme/{{ s.scheme_name | replace(' ', '-') }}" class="admin-action-btn view" title="View">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </a>
+                  <a href="/admin/edit/{{ s.id }}" class="admin-action-btn edit" title="Edit">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </a>
+                  <a href="/admin/delete/{{ s.id }}" class="admin-action-btn delete" title="Delete"
+                     onclick="return confirm('Delete {{ s.scheme_name }}? This cannot be undone.')">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                      <path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                    </svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="admin-empty">
+        <div class="admin-empty-icon">📭</div>
+        <h3>No schemes yet</h3>
+        <p>Add your first scheme to get started.</p>
+        <a href="/admin/add-scheme" class="btn-primary" style="margin-top:16px;display:inline-flex;">Add Scheme</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </main>
+</div>
+
+<script>
+function filterTable() {
+  const q = document.getElementById('adminSearch').value.toLowerCase();
+  document.querySelectorAll('#adminTable tbody tr').forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function setMode(mode) {
+    document.body.className = mode;
+
+    document.querySelectorAll('.mode-btn').forEach(btn =>
+        btn.classList.remove('active')
+    );
+
+    document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1))
+        .classList.add('active');
+}
+</script>
+{% endblock %}

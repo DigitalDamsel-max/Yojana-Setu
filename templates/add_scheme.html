@@ -1,86 +1,124 @@
 {% extends "base.html" %}
-{% block title %}Admin — Manage Schemes{% endblock %}
+{% block title %}Add Scheme — Admin{% endblock %}
 
 {% block content %}
-<div class="home-content">
-  <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Admin Panel</span></div>
-  <h2 class="section-title">Manage Schemes</h2>
+<div class="admin-layout">
 
-  <!-- Add Form -->
-  <div class="info-card" style="margin-bottom:32px;">
-    <div class="card-header"><div class="card-header-icon">➕</div><h3>Add New Scheme</h3></div>
-    <form method="POST" action="/admin/add-scheme" class="admin-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Scheme Name</label>
-          <input type="text" name="scheme_name" placeholder="e.g. PM Kisan Samman Nidhi" required>
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select name="category" required>
-            <option value="all">All</option>
-            <option value="health">Health</option>
-            <option value="agriculture">Agriculture</option>
-            <option value="education">Education</option>
-            <option value="women">Women</option>
-            <option value="housing">Housing</option>
-            <option value="employment">Employment</option>
-          </select>
-        </div>
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div class="admin-brand-icon">⚙️</div>
+      <div>
+        <div class="admin-brand-title">Admin Panel</div>
+        <div class="admin-brand-sub">Yojana Setu</div>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea name="description" rows="3" placeholder="Describe the scheme..." required></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Min Income (₹)</label>
-          <input type="number" name="min_income" placeholder="0" min="0" required>
-        </div>
-        <div class="form-group">
-          <label>Max Income (₹)</label>
-          <input type="number" name="max_income" placeholder="500000" min="0" required>
-        </div>
-        <div class="form-group">
-          <label>Official URL</label>
-          <input type="url" name="official_url" placeholder="https://...">
-        </div>
-      </div>
-      <button type="submit" class="btn-primary">Add Scheme</button>
-    </form>
-  </div>
-
-  <!-- Existing Schemes Table -->
-  <div class="info-card">
-    <div class="card-header"><div class="card-header-icon">📋</div><h3>All Schemes ({{ schemes|length }})</h3></div>
-    {% if schemes %}
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th><th>Name</th><th>Category</th><th>Income Range</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for s in schemes %}
-          <tr>
-            <td>{{ s.id }}</td>
-            <td><strong>{{ s.scheme_name }}</strong></td>
-            <td><span class="scheme-tag tag-popular">{{ s.category }}</span></td>
-            <td>₹{{ "{:,}".format(s.min_income) }} – ₹{{ "{:,}".format(s.max_income) }}</td>
-            <td class="action-btns">
-              <a href="/admin/edit/{{ s.id }}" class="btn-edit">Edit</a>
-              <a href="/admin/delete/{{ s.id }}" class="btn-delete" onclick="return confirm('Delete {{ s.scheme_name }}?')">Delete</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
     </div>
-    {% else %}
-      <p style="color:var(--ink-soft); padding:16px 0;">No schemes added yet.</p>
-    {% endif %}
-  </div>
-</div>
-{% endblock %}
+    <nav class="admin-nav">
+      <a href="/admin" class="admin-nav-item active">
+        <span class="admin-nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="/all-schemes" class="admin-nav-item">
+        <span class="admin-nav-icon">📋</span> All Schemes
+      </a>
+      <a href="/admin/add-scheme" class="admin-nav-item">
+        <span class="admin-nav-icon">➕</span> Add Scheme
+      </a>
+      <a href="/" class="admin-nav-item">
+        <span class="admin-nav-icon">🌐</span> Visit Site
+      </a>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <div class="admin-user-info">
+        <div class="admin-user-avatar">👤</div>
+        <div>
+          <div class="admin-user-name">Administrator</div>
+          <div class="admin-user-role">Super Admin</div>
+        </div>
+      </div>
+      <a href="/logout" class="admin-logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </a>
+    </div>
+  </aside>
 
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-page-eyebrow">Admin Panel</div>
+        <h1 class="admin-page-title">Manage Schemes</h1>
+      </div>
+    </div>
+
+    <div class="admin-form-grid">
+
+      <!-- Add Form -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h2 class="admin-card-title">➕ Add New Scheme</h2>
+        </div>
+        <form method="POST" action="/admin/add-scheme" class="admin-form">
+          <div class="admin-form-row">
+            <div class="form-group">
+              <label>Scheme Name *</label>
+              <input type="text" name="scheme_name" placeholder="e.g. PM Kisan Samman Nidhi" required>
+            </div>
+            <div class="form-group">
+              <label>Category *</label>
+              <select name="category" required>
+                <option value="" disabled selected>Select category</option>
+                <option value="all">General / All</option>
+                <option value="health">Health &amp; Insurance</option>
+                <option value="agriculture">Agriculture &amp; Farmers</option>
+                <option value="education">Education &amp; Scholarships</option>
+                <option value="women">Women &amp; Child Welfare</option>
+                <option value="housing">Housing</option>
+                <option value="employment">Employment &amp; Skill</option>
+                <option value="loan">Loan</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description *</label>
+            <textarea name="description" rows="3" placeholder="Describe the scheme and its benefits…" required></textarea>
+          </div>
+          <div class="admin-form-row">
+            <div class="form-group">
+              <label>Min. Annual Income (₹) *</label>
+              <input type="number" name="min_income" placeholder="0" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Max. Annual Income (₹) *</label>
+              <input type="number" name="max_income" placeholder="500000" min="0" required>
+            </div>
+            <div class="form-group">
+              <label>Official URL</label>
+              <input type="url" name="official_url" placeholder="https://...">
+            </div>
+          </div>
+          <div class="admin-form-actions">
+            <button type="submit" class="btn-primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Save Scheme
+            </button>
+            <button type="reset" class="btn-outline">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function filterList() {
+  const q = document.getElementById('sideSearch').value.toLowerCase();
+  document.querySelectorAll('.admin-scheme-list-item').forEach(item => {
+    item.style.display = item.dataset.name.includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

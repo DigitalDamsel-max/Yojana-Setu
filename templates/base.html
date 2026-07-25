@@ -1,16 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="saffron" data-mode="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Yojana Setu{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Apply saved theme BEFORE paint — prevents flash of wrong theme -->
+  <script>
+    (function () {
+      var t = localStorage.getItem('ys_theme') || 'saffron';
+      var m = localStorage.getItem('ys_mode')  || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-mode',  m);
+    })();
+  </script>
 </head>
 <body>
 
 <header>
   <div class="tricolor-bar"></div>
   <div class="header-inner">
+
     <a href="/" class="brand">
       <div class="brand-emblem">
         <div class="circle-outer"></div>
@@ -21,8 +33,11 @@
         <span class="brand-sub">Government of India</span>
       </div>
     </a>
+
     <nav>
+      <a href="/" class="nav-link">Home</a>
       <a href="/all-schemes" class="nav-link">All Schemes</a>
+
       {% if session.get("user_id") %}
         {% if session.get("user_id") == 1 %}
           <a href="/admin/add-scheme" class="nav-link">Admin</a>
@@ -32,8 +47,9 @@
         <a href="/login" class="nav-login">Login</a>
         <a href="/register" class="nav-register">Register</a>
       {% endif %}
-      
+
     </nav>
+
   </div>
 </header>
 
@@ -52,6 +68,12 @@
   {% block content %}{% endblock %}
 </main>
 
+<!-- Floating AI chat button — redirects directly to /chat -->
+<div class="chat-wrapper" onclick="window.location.href='/chat'" title="Chat with AI Assistant">
+  <div class="chat-tooltip" id="chatTip">Need help? Ask AI!</div>
+  <div class="chat-btn">🤖</div>
+</div>
+
 <footer>
   <div class="footer-inner">
     <p>© 2025 <span>Yojana Setu</span> &nbsp;·&nbsp; Empowering every citizen with access to government benefits.</p>
@@ -63,6 +85,272 @@
     </div>
   </div>
 </footer>
+
+<script>
+  // ══════════════════════════════════════
+  // THEME — DARK / LIGHT (FIXED: mode toggling now works correctly)
+  // ══════════════════════════════════════
+  function toggleMode() {
+    var currentMode = document.documentElement.getAttribute('data-mode') || localStorage.getItem('ys_mode') || 'light';
+    var newMode = currentMode === 'light' ? 'dark' : 'light';
+    setMode(newMode);
+  }
+
+  function setMode(mode) {
+    // Update both attribute and localStorage
+    document.documentElement.setAttribute('data-mode', mode);
+    localStorage.setItem('ys_mode', mode);
+    
+    // Update icon
+    var icon = document.getElementById('modeIcon');
+    if (icon) {
+      icon.textContent = mode === 'dark' ? '☀️' : '🌙';
+    }
+    
+    // Optional: update any additional UI elements if needed
+    var lb = document.getElementById('modeLightBtn');
+    var db = document.getElementById('modeDarkBtn');
+    if (lb) lb.classList.toggle('active', mode === 'light');
+    if (db) db.classList.toggle('active',  mode === 'dark');
+    
+    // Announce for screen readers
+    announce(mode === 'dark' ? 'Dark mode enabled' : 'Light mode enabled');
+  }
+
+  
+  // ══════════════════════════════════════
+  // THEME — COLOR
+  // ══════════════════════════════════════
+  function setTheme(name) {
+    document.documentElement.setAttribute('data-theme', name);
+    localStorage.setItem('ys_theme', name);
+    var swatches = document.querySelectorAll('.swatch');
+    if (swatches.length) {
+      swatches.forEach(function(s) {
+        if (s.dataset) s.classList.toggle('active', s.dataset.theme === name);
+      });
+    }
+  }
+
+
+  // ══════════════════════════════════════
+  // PANEL OPEN / CLOSE (if FAB exists)
+  // ══════════════════════════════════════
+  function openPanel() {
+    var panel = document.getElementById('themePanel');
+    var overlay = document.getElementById('themeOverlay');
+    if (panel) panel.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    syncAllSettings();
+  }
+
+  function closePanel() {
+    var panel = document.getElementById('themePanel');
+    var overlay = document.getElementById('themeOverlay');
+    if (panel) panel.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  // Safely attach FAB event if element exists
+  var fab = document.getElementById('themeFab');
+  if (fab) {
+    fab.addEventListener('click', openPanel);
+  }
+  var closeBtn = document.getElementById('themeClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closePanel);
+  }
+
+  // ══════════════════════════════════════
+  // ACCESSIBILITY — FONT SIZE
+  // ══════════════════════════════════════
+  var fontStep = 0; // -1 = small, 0 = normal, 1 = large, 2 = xl
+  var fontLabels = ['Small', 'Normal', 'Large', 'Extra Large'];
+  var fontSizes  = ['14px',  '16px',   '18px',  '21px'];
+
+  function changeFontSize(dir) {
+    fontStep = Math.max(-1, Math.min(2, fontStep + dir));
+    var idx = fontStep + 1; // offset so -1 → 0
+    document.documentElement.style.fontSize = fontSizes[idx];
+    localStorage.setItem('ys_fontStep', fontStep);
+    var lbl = document.getElementById('fontSizeLabel');
+    if (lbl) lbl.textContent = fontLabels[idx];
+    announce('Font size set to ' + fontLabels[idx]);
+  }
+
+  // ══════════════════════════════════════
+  // ACCESSIBILITY — HIGH CONTRAST
+  // ══════════════════════════════════════
+  var contrastOn = false;
+  function toggleContrast() {
+    contrastOn = !contrastOn;
+    document.documentElement.setAttribute('data-contrast', contrastOn ? 'high' : 'normal');
+    localStorage.setItem('ys_contrast', contrastOn ? 'high' : 'normal');
+    var btn = document.getElementById('contrastBtn');
+    if (btn) btn.classList.toggle('active', contrastOn);
+    announce(contrastOn ? 'High contrast mode on' : 'High contrast mode off');
+  }
+
+  // ══════════════════════════════════════
+  // ACCESSIBILITY — DYSLEXIA FONT
+  // ══════════════════════════════════════
+  var dyslexiaOn = false;
+  function toggleDyslexia() {
+    dyslexiaOn = !dyslexiaOn;
+    document.documentElement.setAttribute('data-dyslexia', dyslexiaOn ? 'on' : 'off');
+    localStorage.setItem('ys_dyslexia', dyslexiaOn ? 'on' : 'off');
+    var btn = document.getElementById('dyslexiaBtn');
+    if (btn) btn.classList.toggle('active', dyslexiaOn);
+    announce(dyslexiaOn ? 'Dyslexia-friendly font on' : 'Dyslexia font off');
+  }
+
+  // ══════════════════════════════════════
+  // ACCESSIBILITY — REDUCE MOTION
+  // ══════════════════════════════════════
+  var motionReduced = false;
+  function toggleMotion() {
+    motionReduced = !motionReduced;
+    document.documentElement.setAttribute('data-motion', motionReduced ? 'reduced' : 'normal');
+    localStorage.setItem('ys_motion', motionReduced ? 'reduced' : 'normal');
+    var btn = document.getElementById('motionBtn');
+    if (btn) btn.classList.toggle('active', motionReduced);
+    announce(motionReduced ? 'Animations reduced' : 'Animations restored');
+  }
+
+  // ══════════════════════════════════════
+  // ACCESSIBILITY — TEXT TO SPEECH
+  // ══════════════════════════════════════
+  var ttsOn = false;
+  function toggleTTS() {
+    ttsOn = !ttsOn;
+    localStorage.setItem('ys_tts', ttsOn ? 'on' : 'off');
+    var btn = document.getElementById('ttsBtn');
+    if (btn) btn.classList.toggle('active', ttsOn);
+
+    if (ttsOn) {
+      announce('Read aloud is on. Click any text to hear it.');
+      document.body.addEventListener('click', handleTTSClick);
+    } else {
+      window.speechSynthesis.cancel();
+      document.body.removeEventListener('click', handleTTSClick);
+      announce('Read aloud off');
+    }
+  }
+
+  function handleTTSClick(e) {
+    // Don't read if clicking buttons/links
+    if (['BUTTON','A','INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    var text = e.target.innerText || e.target.textContent;
+    if (!text || text.trim().length < 2) return;
+    window.speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(text.trim());
+    utt.lang = 'en-IN';
+    utt.rate = 0.9;
+    window.speechSynthesis.speak(utt);
+  }
+
+  // ══════════════════════════════════════
+  // SCREEN READER ANNOUNCER
+  // ══════════════════════════════════════
+  function announce(msg) {
+    var el = document.getElementById('srAnnounce');
+    if (!el) {
+      // create if missing for safety
+      var newEl = document.createElement('div');
+      newEl.id = 'srAnnounce';
+      newEl.setAttribute('aria-live', 'polite');
+      newEl.style.position = 'absolute';
+      newEl.style.width = '1px';
+      newEl.style.height = '1px';
+      newEl.style.padding = '0';
+      newEl.style.margin = '-1px';
+      newEl.style.overflow = 'hidden';
+      newEl.style.clip = 'rect(0,0,0,0)';
+      newEl.style.border = '0';
+      document.body.appendChild(newEl);
+      el = newEl;
+    }
+    el.textContent = '';
+    setTimeout(function() { el.textContent = msg; }, 50);
+  }
+
+  // ══════════════════════════════════════
+  // SYNC ALL — called on page load & panel open
+  // ══════════════════════════════════════
+  function syncAllSettings() {
+    // Mode (dark/light)
+    var m = localStorage.getItem('ys_mode')  || 'light';
+    setMode(m);
+    
+    // Color theme
+    var t = localStorage.getItem('ys_theme') || 'saffron';
+    setTheme(t);
+
+    // Font size
+    var fs = parseInt(localStorage.getItem('ys_fontStep') || '0');
+    fontStep = fs; // stored value is the step directly
+    var idx = fontStep + 1;
+    if (idx >= 0 && idx < fontSizes.length) {
+      document.documentElement.style.fontSize = fontSizes[idx];
+      var fontSizeLbl = document.getElementById('fontSizeLabel');
+      if (fontSizeLbl) fontSizeLbl.textContent = fontLabels[idx];
+    }
+
+    // Contrast
+    var c = localStorage.getItem('ys_contrast') || 'normal';
+    contrastOn = c === 'high';
+    document.documentElement.setAttribute('data-contrast', c);
+    var cb = document.getElementById('contrastBtn');
+    if (cb) cb.classList.toggle('active', contrastOn);
+
+    // Dyslexia
+    var d = localStorage.getItem('ys_dyslexia') || 'off';
+    dyslexiaOn = d === 'on';
+    document.documentElement.setAttribute('data-dyslexia', d);
+    var db = document.getElementById('dyslexiaBtn');
+    if (db) db.classList.toggle('active', dyslexiaOn);
+
+    // Motion
+    var mo = localStorage.getItem('ys_motion') || 'normal';
+    motionReduced = mo === 'reduced';
+    document.documentElement.setAttribute('data-motion', mo);
+    var mb = document.getElementById('motionBtn');
+    if (mb) mb.classList.toggle('active', motionReduced);
+
+    // TTS
+    var tt = localStorage.getItem('ys_tts') || 'off';
+    ttsOn = tt === 'on';
+    var tb = document.getElementById('ttsBtn');
+    if (tb) tb.classList.toggle('active', ttsOn);
+    if (ttsOn) {
+      document.body.addEventListener('click', handleTTSClick);
+    } else {
+      document.body.removeEventListener('click', handleTTSClick);
+    }
+  }
+
+  // ── INIT ──
+  window.addEventListener('DOMContentLoaded', function() {
+    syncAllSettings();
+    // ensure the mode icon is correct after any potential race
+    var currentMode = document.documentElement.getAttribute('data-mode');
+    var modeIconSpan = document.getElementById('modeIcon');
+    if (modeIconSpan && currentMode) {
+      modeIconSpan.textContent = currentMode === 'dark' ? '☀️' : '🌙';
+    }
+  });
+
+  // ── Chat button glow after 5s ──
+  setTimeout(function () {
+    var btn = document.querySelector('.chat-btn');
+    var tip = document.getElementById('chatTip');
+    if (btn) btn.classList.add('glow');
+    if (tip) tip.classList.add('glow');
+  }, 5000);
+</script>
+
+<!-- Hidden screen reader announcer container (if not already present) -->
+<div id="srAnnounce" aria-live="polite" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></div>
 
 </body>
 </html>

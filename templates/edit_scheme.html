@@ -1,53 +1,112 @@
 {% extends "base.html" %}
-{% block title %}Edit Scheme — Admin{% endblock %}
+{% block title %}Edit {{ scheme.scheme_name }} — Admin{% endblock %}
 
 {% block content %}
-<div class="home-content">
-  <a href="/admin/add-scheme" class="back-link">← Back to Admin</a>
-  <div class="section-eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-text">Admin Panel</span></div>
-  <h2 class="section-title">Edit Scheme</h2>
+<div class="admin-layout">
 
-  <div class="info-card" style="max-width:720px;">
-    <div class="card-header"><div class="card-header-icon">✏️</div><h3>{{ scheme.scheme_name }}</h3></div>
-    <form method="POST" action="/admin/edit/{{ scheme.id }}" class="admin-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Scheme Name</label>
-          <input type="text" name="scheme_name" value="{{ scheme.scheme_name }}" required>
-        </div>
-        <div class="form-group">
-          <label>Category</label>
-          <select name="category" required>
-            {% for cat in ['all','health','agriculture','education','women','housing','employment'] %}
-              <option value="{{ cat }}" {% if scheme.category == cat %}selected{% endif %}>{{ cat | capitalize }}</option>
-            {% endfor %}
-          </select>
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div class="admin-brand-icon">⚙️</div>
+      <div>
+        <div class="admin-brand-title">Admin Panel</div>
+        <div class="admin-brand-sub">Yojana Setu</div>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <a href="/admin" class="admin-nav-item">
+        <span class="admin-nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="/admin/add-scheme" class="admin-nav-item">
+        <span class="admin-nav-icon">➕</span> Add Scheme
+      </a>
+      <a href="/all-schemes" class="admin-nav-item">
+        <span class="admin-nav-icon">📋</span> All Schemes
+      </a>
+      <a href="/" class="admin-nav-item">
+        <span class="admin-nav-icon">🌐</span> Visit Site
+      </a>
+    </nav>
+    <div class="admin-sidebar-footer">
+      <div class="admin-user-info">
+        <div class="admin-user-avatar">👤</div>
+        <div>
+          <div class="admin-user-name">Administrator</div>
+          <div class="admin-user-role">Super Admin</div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <textarea name="description" rows="3" required>{{ scheme.description }}</textarea>
+      <a href="/logout" class="admin-logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div>
+        <div class="admin-page-eyebrow">Admin → Edit</div>
+        <h1 class="admin-page-title">Edit Scheme</h1>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Min Income (₹)</label>
-          <input type="number" name="min_income" value="{{ scheme.min_income }}" required>
-        </div>
-        <div class="form-group">
-          <label>Max Income (₹)</label>
-          <input type="number" name="max_income" value="{{ scheme.max_income }}" required>
-        </div>
-        <div class="form-group">
-          <label>Official URL</label>
-          <input type="url" name="official_url" value="{{ scheme.official_url or '' }}">
-        </div>
+      <a href="/admin/add-scheme" class="btn-outline">← Back</a>
+    </div>
+
+    <div class="admin-card" style="max-width:780px;">
+      <div class="admin-card-header" style="margin-top:24px;">
+        <h2 class="admin-card-title">✏️ Update Details</h2>
       </div>
-      <div style="display:flex;gap:12px;">
-        <button type="submit" class="btn-primary">Save Changes</button>
-        <a href="/admin/add-scheme" class="btn-outline">Cancel</a>
-      </div>
-    </form>
-  </div>
+
+      <form method="POST" action="/admin/edit/{{ scheme.id }}" class="admin-form">
+        <div class="admin-form-row">
+          <div class="form-group">
+            <label>Scheme Name *</label>
+            <input type="text" name="scheme_name" value="{{ scheme.scheme_name }}" required>
+          </div>
+          <div class="form-group">
+            <label>Category *</label>
+            <select name="category" required>
+              {% for cat in ['all','health','agriculture','education','women','housing','employment','loan'] %}
+                <option value="{{ cat }}" {% if scheme.category == cat %}selected{% endif %}>
+                  {{ cat | capitalize }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description *</label>
+          <textarea name="description" rows="4" required>{{ scheme.description }}</textarea>
+        </div>
+
+        <div class="admin-form-row">
+          <div class="form-group">
+            <label>Min. Annual Income (₹) *</label>
+            <input type="number" name="min_income" value="{{ scheme.min_income }}" required>
+          </div>
+          <div class="form-group">
+            <label>Max. Annual Income (₹) *</label>
+            <input type="number" name="max_income" value="{{ scheme.max_income }}" required>
+          </div>
+          <div class="form-group">
+            <label>Official URL</label>
+            <input type="url" name="official_url" value="{{ scheme.official_url or '' }}">
+          </div>
+        </div>
+
+        <div class="admin-form-actions">
+          <button type="submit" class="btn-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Save Changes
+          </button>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
 </div>
 {% endblock %}
-

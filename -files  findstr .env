@@ -1,0 +1,199 @@
+[33mcommit 2786e59fe748c0ff0ff378cda849801b879f864b[m
+Author: DigitalDamsel-max <mrunalibhujade80@gmail.com>
+Date:   Fri Jul 24 23:11:04 2026 +0530
+
+    Prepare YojanaSetu for deployment
+
+[1mdiff --git a/__pycache__/schemes.cpython-311.pyc b/__pycache__/schemes.cpython-311.pyc[m
+[1mnew file mode 100644[m
+[1mindex 0000000..7ea659d[m
+Binary files /dev/null and b/__pycache__/schemes.cpython-311.pyc differ
+[1mdiff --git a/app.py b/app.py[m
+[1mindex cb0f507..fea7a1f 100644[m
+[1m--- a/app.py[m
+[1m+++ b/app.py[m
+[36m@@ -1,15 +1,27 @@[m
+[32m+[m[32mfrom flask import flash[m
+[32m+[m[32mfrom flask import jsonify[m
+ from datetime import timedelta[m
+ from flask import Flask, flash, render_template, request, redirect, url_for, session[m
+ from werkzeug.security import generate_password_hash, check_password_hash[m
+ from db_config import get_db_connection[m
+[31m-[m
+ import socket[m
+[32m+[m
+ print("FLASK RUNNING ON:", socket.gethostname())[m
+ [m
+ app = Flask(__name__)[m
+ app.secret_key = "yojanasetu_secret_key"[m
+ app.permanent_session_lifetime = timedelta(minutes=60)[m
+ [m
+[32m+[m[32m@app.route("/check-db")[m
+[32m+[m[32mdef check_db():[m
+[32m+[m[32m    conn = get_db_connection()[m
+[32m+[m[32m    cursor = conn.cursor()[m
+[32m+[m
+[32m+[m[32m    cursor.execute("SELECT email, password FROM users")[m
+[32m+[m[32m    users = cursor.fetchall()[m
+[32m+[m
+[32m+[m[32m    return str(users)[m
+[32m+[m
+ [m
+ # ---------- HOME ----------[m
+ @app.route("/")[m
+[36m@@ -44,26 +56,38 @@[m [mdef home():[m
+ def check_eligibility():[m
+     if request.method == "POST":[m
+         income = int(request.form["income"])[m
+[31m-        category = request.form["category"].lower()[m
+[31m-        session["income"] = income[m
+[31m-        session.permanent = True  # FIX : make session persist per app lifetime setting[m
+[32m+[m[32m        category = request.form["category"].lower()[m[41m  [m
+[32m+[m[32m        age = int(request.form.get("age", 0))[m
+[32m+[m[32m        gender = request.form.get("gender", "all")[m
+[32m+[m[32m        occupation = request.form.get("occupation", "all")[m
+[32m+[m[32m        area = request.form.get("area", "all")[m
+ [m
+[32m+[m[32m        session["income"] = income[m
+[32m+[m[32m        session['category'] = category[m
+[32m+[m[32m        session['age'] = age[m
+[32m+[m[32m        session['gender'] = gender[m
+[32m+[m[32m        session['occupation'] = occupation[m[41m      [m
+[32m+[m[32m        session['area'] = area[m
+[32m+[m[32m        session.permanent = True[m
+[32m+[m[32m        eligible_schemes = [][m
+[32m+[m[41m        [m
+         conn = get_db_connection()[m
+         cursor = conn.cursor()[m
+         cursor.execute("""[m
+[31m-            SELECT scheme_name, description, official_url[m
+[32m+[m[32m            SELECT scheme_name, description, category, official_url, min_income, max_income[m
+             FROM schemes[m
+[31m-            WHERE is_active=TRUE[m
+[31m-              AND %s BETWEEN min_income AND max_income[m
+[31m-              AND (category=%s OR category='all')[m
+[31m-        """, (income, category))[m
+[31m-[m
+[31m-        schemes = cursor.fetchall()[m
+[32m+[m[32m            WHERE min_income <= %s[m
+[32m+[m[32m            AND max_income >= %s[m
+[32m+[m[32m            AND (LOWER(category) = %s OR LOWER(category) = 'all')[m
+[32m+[m[32m            AND (LOWER(gender) = %s OR LOWER(gender) = 'all')[m
+[32m+[m[32m        """, (income, income, category, gender.lower()))[m
+[32m+[m[41m        [m
+[32m+[m[32m        eligible_schemes = cursor.fetchall()[m
+         conn.commit()[m
+         cursor.close()[m
+         conn.close()[m
+ [m
+[31m-        return render_template("results.html", schemes=schemes)[m
+[32m+[m[32m        return render_template("results.html", schemes=eligible_schemes)[m
+ [m
+     return render_template("eligibility_form.html")[m
+ [m
+[36m@@ -96,7 +120,6 @@[m [mdef all_schemes():[m
+ def category(cat):[m
+     conn = get_db_connection()[m
+     cursor = conn.cursor()[m
+[31m-    # LOWER() on both sides so Health/health/HEALTH all match[m
+     cursor.execute([m
+         "SELECT * FROM schemes WHERE LOWER(category)=LOWER(%s) AND is_active=TRUE ORDER BY id DESC",[m
+         (cat,))[m
+[36m@@ -108,7 +131,7 @@[m [mdef category(cat):[m
+ [m
+ [m
+ # ---------- SCHEME DETAIL ----------[m
+[31m-@app.route("/scheme/<name>")  # FIX : changed from /admin/scheme/<name> so navbar links work[m
+[32m+[m[32m@app.route("/scheme/<name>")[m[41m  [m
+ def scheme_detail(name):[m
+     scheme_name = name.replace('-', ' ')[m
+     conn = get_db_connection()[m
+[36m@@ -119,18 +142,41 @@[m [mdef scheme_detail(name):[m
+         FROM schemes[m
+         WHERE scheme_name = %s[m
+     """, (scheme_name,))[m
+[32m+[m[32m    documents_map = {[m
+[32m+[m[32m    "Ayushman Bharat": ["Aadhaar", "Income Certificate"],[m
+[32m+[m[32m    "PM Awas Yojana": ["Aadhaar", "Address Proof"][m
+[32m+[m[32m    }[m
+     scheme = cursor.fetchone()[m
+     conn.commit()[m
+     cursor.close()[m
+     conn.close()[m
+[31m-    return render_template("scheme_detail.html", scheme=scheme)[m
+[32m+[m[32m    docs = documents_map.get(scheme["scheme_name"], ["Aadhaar"])[m
+ [m
+[32m+[m[32m    return render_template("scheme_detail.html",[m
+[32m+[m[32m        scheme=scheme,[m
+[32m+[m[32m        documents=docs[m
+[32m+[m[32m    )[m
+ [m
+ # ---------- ADMIN ----------[m
+[32m+[m[32m@app.route("/admin")[m
+[32m+[m[32mdef admin_dashboard():[m
+[32m+[m[32m    if session.get("role") != "admin":[m
+[32m+[m[32m        return "Access Denied"[m
+[32m+[m
+[32m+[m[32m    conn = get_db_connection()[m
+[32m+[m[32m    cursor = conn.cursor()[m
+[32m+[m
+[32m+[m[32m    cursor.execute("SELECT * FROM schemes")[m
+[32m+[m[32m    schemes = cursor.fetchall()[m
+[32m+[m
+[32m+[m[32m    return render_template("admin_dashboard.html", schemes=schemes)[m
+[32m+[m
+[32m+[m
+[32m+[m
+ @app.route("/admin/add-scheme", methods=["GET", "POST"])[m
+ def add_scheme():[m
+[31m-    if session.get("user_id") != 1:[m
+[31m-        return "Access Denied", 403  # FIX : return proper HTTP status code[m
+[32m+[m[32m    if session.get("role") != "admin":[m
+[32m+[m[32m        return "Access Denied", 403  # returns proper HTTP status code[m
+ [m
+     conn = get_db_connection()[m
+     cursor = conn.cursor()[m
+[36m@@ -153,25 +199,31 @@[m [mdef add_scheme():[m
+     schemes = cursor.fetchall()[m
+     cursor.close()[m
+     conn.close()[m
+[32m+[m[32m    flash("Scheme added successfully!", "success")[m
+     return render_template("add_scheme.html", schemes=schemes)[m
+ [m
+ [m
+ @app.route("/admin/delete/<int:id>")[m
+ def delete_scheme(id):[m
+[31m-    if session.get("user_id") != 1:  # FIX : protect delete route too[m
+[32m+[m[32m    if session.get("role") != "admin":[m
+         return "Access Denied", 403[m
+[32m+[m[41m    [m
+     conn = get_db_connection()[m
+     cursor = conn.cursor()[m
+     cursor.execute("DELETE FROM schemes WHERE id=%s", (id,))[m
+     conn.commit()[m
+     cursor.close()[m
+     conn.close()[m
+[31m-    return redirect(url_for("add_scheme"))  # FIX : use url_for instead of hardcoded path[m
+[32m+[m[32m    flash("Scheme deleted successfully!", "success")[m
+[32m+[m[32m    return redirect(url_for("admin_dashboard"))[m[41m  [m
+ [m
+ [m
+ @app.route("/admin/edit/<int:id>", methods=["GET", "POST"])[m
+ def edit_scheme(id):[m
+[31m-    conn = get_db_connection()          # FIX 11: conn/cursor must be created before both branches[m
+[32m+[m[32m    if session.get("role") != "admin":[m
+[32m+[m[32m        return "Access Denied", 403[m
+[32m+[m[41m    [m
+[32m+[m[32m    conn = get_db_connection()[m
+     cursor = conn.cursor()[m
+ [m
+     if request.method == "POST":[m
+[36m@@ -189,16 +241,86 @@[m [mdef edit_scheme(id):[m
+             request.form["official_url"],[m
+             id[m
+         ))[m
+[32m+[m
+         conn.commit()[m
+         cursor.close()[m
+         conn.close()[m
+[3

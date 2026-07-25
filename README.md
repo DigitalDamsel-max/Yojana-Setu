@@ -24,7 +24,5 @@ YojanaSetu is a web-based tool that helps users check their eligibility for vari
 This project aims to simplify access to government welfare schemes by helping users quickly determine which schemes they may qualify for.
 
 ## Future Improvements
-- Add chatbot to resolve user queries
 - Expand scheme database
 - Email verification
-- Add multi-lingual support

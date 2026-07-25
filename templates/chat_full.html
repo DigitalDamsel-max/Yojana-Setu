@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="saffron" data-mode="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Welfare Assistant — Yojana Setu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+</head>
+<body>
+
+<!-- Reuse site header -->
+<header>
+  <div class="tricolor-bar"></div>
+  <div class="header-inner">
+    <a href="/" class="brand">
+      <div class="brand-emblem">
+        <div class="circle-outer"></div>
+        <div class="inner-circle">🏛</div>
+      </div>
+      <div>
+        <span class="brand-name">Yojana Setu</span>
+        <span class="brand-sub">Government of India</span>
+      </div>
+    </a>
+    <nav>
+      <a href="/" class="nav-link">Home</a>
+      <a href="/all-schemes" class="nav-link">All Schemes</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Chat Page -->
+<div class="chat-page">
+
+  <!-- Sidebar -->
+  <aside class="chat-sidebar">
+    <div class="sidebar-header">
+      <div class="bot-avatar-lg">
+        <div class="bot-avatar-ring"></div>
+        <span class="bot-avatar-emoji">🤖</span>
+      </div>
+      <h2 class="sidebar-title">PM Welfare<br>Assistant</h2>
+      <p class="sidebar-sub">Powered by AI · Available 24/7</p>
+    </div>
+
+    <div class="theme-section">
+      <span class="theme-section-label">Mode</span>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeLight" onclick="setMode('light')">☀️ Light</button>
+        <button class="mode-btn" id="modeDark" onclick="setMode('dark')">🌙 Dark</button>
+      </div>
+    </div>
+
+    <p class="sidebar-label">Quick Questions</p>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="quickAsk('What is Ayushman Bharat?')">🏥 Ayushman Bharat</button>
+      <button class="quick-btn" onclick="quickAsk('Tell me about PM Kisan Samman Nidhi')">🌾 PM Kisan</button>
+      <button class="quick-btn" onclick="quickAsk('How to apply for PM Ujjwala Yojana?')">🔥 Ujjwala Yojana</button>
+      <button class="quick-btn" onclick="quickAsk('What schemes are available for women?')">👩 Women Schemes</button>
+      <button class="quick-btn" onclick="quickAsk('What education schemes are available?')">📚 Education</button>
+      <button class="quick-btn" onclick="quickAsk('Housing schemes for poor families')">🏠 Housing</button>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <button class="clear-btn" onclick="clearChat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+      </svg>
+      Clear Chat
+    </button>
+  </aside>
+
+  <!-- Chat Window -->
+  <div class="chat-window">
+
+    <!-- Chat Messages -->
+    <div id="chat-messages" class="chat-messages">
+
+      <!-- Welcome message -->
+      <div class="msg-row bot-row">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble bot-bubble">
+          <div class="msg-header">PM Welfare Assistant <span class="msg-time" id="welcomeTime"></span></div>
+          <p>👋 Namaste! I'm your <strong>PM Welfare Schemes Assistant</strong>.</p>
+          <p style="margin-top:8px;">I can help you with:</p>
+          <div class="welcome-chips">
+            <span class="chip">📋 Scheme Details</span>
+            <span class="chip">✅ Eligibility Check</span>
+            <span class="chip">📝 How to Apply</span>
+            <span class="chip">💰 Benefits</span>
+          </div>
+          <p style="margin-top:10px; font-size:0.82rem; opacity:0.7;">Use the quick buttons on the left or type your question below.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Typing indicator (hidden by default) -->
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="msg-avatar">🤖</div>
+      <div class="typing-bubble">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chat-input-bar">
+
+      <!-- Language selector -->
+      <div class="lang-bar">
+        <span class="lang-label">🌐 Language:</span>
+        <div class="lang-chips" id="langChips">
+          <button class="lang-chip active" data-lang="en-IN">English</button>
+          <button class="lang-chip" data-lang="hi-IN">हिंदी</button>
+          <button class="lang-chip" data-lang="ta-IN">தமிழ்</button>
+          <button class="lang-chip" data-lang="te-IN">తెలుగు</button>
+          <button class="lang-chip" data-lang="bn-IN">বাংলা</button>
+          <button class="lang-chip" data-lang="mr-IN">मराठी</button>
+          <button class="lang-chip" data-lang="gu-IN">ગુજરાતી</button>
+          <button class="lang-chip" data-lang="kn-IN">ಕನ್ನಡ</button>
+          <button class="lang-chip" data-lang="ml-IN">മലയാളം</button>
+          <button class="lang-chip" data-lang="pa-IN">ਪੰਜਾਬੀ</button>
+        </div>
+      </div>
+
+      <!-- Input row -->
+      <div class="input-wrapper">
+        <input
+          type="text"
+          id="userMsg"
+          placeholder="Ask about any government scheme…"
+          autocomplete="off"
+          onkeydown="if(event.key==='Enter') sendMessage()"
+        />
+        <!-- Mic button -->
+        <button class="mic-btn" id="micBtn" title="Speak your question" onclick="toggleMic()">
+          <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8"  y1="23" x2="16" y2="23"/>
+          </svg>
+          <span class="mic-ripple" id="micRipple"></span>
+        </button>
+        <!-- Send button -->
+        <button class="send-btn" onclick="sendMessage()" id="sendBtn" title="Send">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Status / hint -->
+      <p class="input-hint" id="inputHint">Responses are AI-generated. Always verify on official government portals.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Set welcome time
+  document.getElementById('welcomeTime').textContent = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+
+  // Apply saved theme
+  (function() {
+    const t = localStorage.getItem('ys_theme') || 'saffron';
+    const m = localStorage.getItem('ys_mode')  || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-mode',  m);
+  })();
+
+  function getTime() {
+    return new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  function appendMessage(text, type) {
+    const chat = document.getElementById('chat-messages');
+    const isBot = type === 'bot';
+
+    const row = document.createElement('div');
+    row.className = `msg-row ${isBot ? 'bot-row' : 'user-row'}`;
+    row.style.animation = 'msgIn 0.3s ease both';
+
+    if (isBot) {
+      row.innerHTML = `
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble bot-bubble">
+          <div class="msg-header">PM Welfare Assistant <span class="msg-time">${getTime()}</span></div>
+          <div class="msg-text">${text}</div>
+        </div>`;
+    } else {
+      row.innerHTML = `
+        <div class="msg-bubble user-bubble">
+          <div class="msg-text">${text}</div>
+          <div class="msg-time user-time">${getTime()}</div>
+        </div>
+        <div class="msg-avatar user-avatar">👤</div>`;
+    }
+
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function setTyping(show) {
+    document.getElementById('typingIndicator').style.display = show ? 'flex' : 'none';
+    const chat = document.getElementById('chat-messages');
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function sendMessage() {
+    const input  = document.getElementById('userMsg');
+    const sendBtn = document.getElementById('sendBtn');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    appendMessage(msg, 'user');
+    input.value = '';
+    input.disabled = true;
+    sendBtn.disabled = true;
+    setTyping(true);
+
+    fetch('/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'message=' + encodeURIComponent(msg)
+    })
+    .then(res => res.json())
+    .then(data => {
+      setTyping(false);
+      appendMessage(data.reply || 'No response received.', 'bot');
+    })
+    .catch(() => {
+      setTyping(false);
+      appendMessage('⚠️ Error connecting to the assistant. Please try again.', 'bot');
+    })
+    .finally(() => {
+      input.disabled = false;
+      sendBtn.disabled = false;
+      input.focus();
+    });
+  }
+
+  function quickAsk(text) {
+    document.getElementById('userMsg').value = text;
+    sendMessage();
+  }
+
+  function clearChat() {
+    const chat = document.getElementById('chat-messages');
+    chat.innerHTML = '';
+    appendMessage(`Chat cleared. How can I help you with PM Welfare Schemes?`, 'bot');
+  }
+
+  // ── LANGUAGE SELECTOR ──
+  let selectedLang = 'en-IN';
+
+  document.getElementById('langChips').addEventListener('click', function(e) {
+    const chip = e.target.closest('.lang-chip');
+    if (!chip) return;
+    document.querySelectorAll('.lang-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedLang = chip.dataset.lang;
+    // Update placeholder to reflect language
+    const names = { 'en-IN':'Ask in English…','hi-IN':'हिंदी में पूछें…','ta-IN':'தமிழில் கேளுங்கள்…','te-IN':'తెలుగులో అడగండి…','bn-IN':'বাংলায় জিজ্ঞেস করুন…','mr-IN':'मराठीत विचारा…','gu-IN':'ગુજરાતીમાં પૂછો…','kn-IN':'ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ…','ml-IN':'മലയാളത്തിൽ ചോദിക്കൂ…','pa-IN':'ਪੰਜਾਬੀ ਵਿੱਚ ਪੁੱਛੋ…' };
+    document.getElementById('userMsg').placeholder = names[selectedLang] || 'Ask about any government scheme…';
+    if (isListening) stopMic();
+  });
+
+  // ── MIC / SPEECH RECOGNITION ──
+  let recognition = null;
+  let isListening  = false;
+
+  function initRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return null;
+
+    const r = new SpeechRecognition();
+    r.continuous      = false;
+    r.interimResults  = true;
+    r.lang            = selectedLang;
+
+    r.onstart = () => {
+      isListening = true;
+      document.getElementById('micBtn').classList.add('listening');
+      document.getElementById('micRipple').classList.add('active');
+      setHint('🎤 Listening… speak now');
+    };
+
+    r.onresult = (e) => {
+      let interim = '', final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        e.results[i].isFinal ? final += t : interim += t;
+      }
+      // Show interim in input as user speaks
+      document.getElementById('userMsg').value = final || interim;
+      if (final) {
+        stopMic();
+        // Small delay so user sees what was recognized, then send
+        setTimeout(() => sendMessage(), 400);
+      }
+    };
+
+    r.onerror = (e) => {
+      stopMic();
+      const msgs = {
+        'not-allowed': '⚠️ Microphone access denied. Please allow mic in browser settings.',
+        'no-speech':   '🔇 No speech detected. Try again.',
+        'network':     '⚠️ Network error during recognition.',
+      };
+      setHint(msgs[e.error] || `⚠️ Error: ${e.error}`);
+      setTimeout(() => setHint('Responses are AI-generated. Always verify on official government portals.'), 3000);
+    };
+
+    r.onend = () => { if (isListening) stopMic(); };
+
+    return r;
+  }
+
+  function toggleMic() {
+    if (!( window.SpeechRecognition || window.webkitSpeechRecognition )) {
+      setHint('⚠️ Your browser does not support voice input. Try Chrome or Edge.');
+      setTimeout(() => setHint('Responses are AI-generated. Always verify on official government portals.'), 4000);
+      return;
+    }
+    isListening ? stopMic() : startMic();
+  }
+
+  function startMic() {
+    recognition = initRecognition();
+    if (!recognition) return;
+    recognition.lang = selectedLang;
+    try { recognition.start(); } catch(e) { console.warn(e); }
+  }
+
+  function stopMic() {
+    isListening = false;
+    document.getElementById('micBtn').classList.remove('listening');
+    document.getElementById('micRipple').classList.remove('active');
+    setHint('Responses are AI-generated. Always verify on official government portals.');
+    if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+  }
+
+  function setHint(text) {
+    document.getElementById('inputHint').textContent = text;
+  }
+</script>
+
+
+<script>
+  // Apply saved theme instantly (before paint)
+  (function() {
+    const t = localStorage.getItem('ys_theme') || 'saffron';
+    const m = localStorage.getItem('ys_mode')  || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-mode',  m);
+  })();
+
+  function setTheme(name) {
+    document.documentElement.setAttribute('data-theme', name);
+    localStorage.setItem('ys_theme', name);
+    document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.theme === name));
+  }
+
+  function setMode(mode) {
+    document.documentElement.setAttribute('data-mode', mode);
+    localStorage.setItem('ys_mode', mode);
+    document.getElementById('modeLight').classList.toggle('active', mode === 'light');
+    document.getElementById('modeDark').classList.toggle('active',  mode === 'dark');
+  }
+
+  // Sync on load
+  window.addEventListener('DOMContentLoaded', () => {
+    setMode(localStorage.getItem('ys_mode')   || 'light');
+    setTheme(localStorage.getItem('ys_theme') || 'saffron');
+  });
+</script>
+
+</body>
+</html>
