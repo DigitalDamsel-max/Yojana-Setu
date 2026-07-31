@@ -13,3 +13,4 @@ def get_db_connection():
 
     print("✅ MySQL CONNECTED")
     return conn
+

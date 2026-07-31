@@ -2589,3 +2589,19 @@ footer span { color: var(--ochre-light); font-weight: 700; }
   background-color: #d4edda;
   color: #155724;
 }
+
+.forgot-password{
+    text-align:right;
+    margin-top:-8px;
+    margin-bottom:20px;
+}
+
+.forgot-password a{
+    color:#007bff;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.forgot-password a:hover{
+    text-decoration:underline;
+}

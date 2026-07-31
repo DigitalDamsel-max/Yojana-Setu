@@ -1,17 +1,33 @@
 from flask import flash
 from flask import jsonify
-from datetime import timedelta
+from datetime import datetime,timedelta
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from db_config import get_db_connection
+from secrets import token_urlsafe
 import socket
 import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 print("FLASK RUNNING ON:", socket.gethostname())
 
 app = Flask(__name__)
 app.secret_key = "yojanasetu_secret_key"
 app.permanent_session_lifetime = timedelta(minutes=60)
+
+from flask_mail import Mail, Message, Message
+
+app.config["MAIL_SERVER"] = "smtp.gmail.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+mail = Mail(app)
+
 
 @app.route("/check-db")
 def check_db():
@@ -277,11 +293,10 @@ def get_schemes():
 
 
 # ---------- CHATBOT --------
+print("GROQ_API_KEY =", os.getenv("GROQ_API_KEY"))
 from openai import OpenAI
-client = OpenAI(
-    api_key=os.getenv("GROQ_API_KEY"),
-    base_url="https://api.groq.com/openai/v1"
-)
+client = OpenAI(api_key=os.getenv("GROQ_API_KEY"),base_url="https://api.groq.com/openai/v1")
+
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
     if "user_id" not in session:
@@ -342,7 +357,7 @@ def login():
             session["user_id"] = user["id"]
             session["role"] = user["role"]   
 
-            # 🔀 Role-based redirect
+            # Role-based redirect
             if user["role"] == "admin":
                 return redirect(url_for("admin_dashboard"))
             else:
@@ -351,6 +366,109 @@ def login():
         flash("Invalid credentials", "danger")
 
     return render_template("login.html")
+
+
+# ---------- FORGOT PASSWORD ----------
+@app.route("/forgot-password", methods=["GET","POST"])
+def forgot_password():
+
+    if request.method=="POST":
+        email=request.form["email"]
+
+        conn=get_db_connection()
+        cursor=conn.cursor()
+        cursor.execute(
+            "SELECT * FROM users WHERE email=%s",
+            (email,)
+        )
+        user=cursor.fetchone()
+
+        if user:
+            token=token_urlsafe(32)
+            expiry=datetime.now()+timedelta(hours=1)
+
+            cursor.execute("""
+            UPDATE users
+            SET reset_token=%s,
+                token_expiry=%s
+            WHERE email=%s
+            """,(token,expiry,email))
+
+            conn.commit()
+            link=url_for(
+                "reset_password",
+                token=token,
+                _external=True
+            )
+            
+            msg = Message(
+                subject="Reset Your Yojana Setu Password",
+                recipients=[email]
+            )
+            msg.body = f"""
+            Hello,
+
+            We received a request to reset your password for your Yojana Setu account.
+
+            Click the link below to reset your password:
+
+            {link}
+
+            This link will expire in 30 minutes.
+
+            If you did not request a password reset, please ignore this email.
+
+            Regards,
+            Yojana Setu Team
+            """
+
+            mail.send(msg)
+
+            flash("Password reset link has been sent to your email.")
+            
+        else:
+            flash("Email not found.")
+
+    return render_template("forgot_password.html")
+
+
+# ---------- RESET PASSWORD ----------
+@app.route("/reset_password/<token>", methods=["GET","POST"])
+def reset_password(token):
+
+    conn=get_db_connection()
+    cursor=conn.cursor()
+    cursor.execute("""
+    SELECT *
+    FROM users
+    WHERE reset_token=%s
+    """,(token,))
+
+    user=cursor.fetchone()
+    if not user:
+        return "Invalid Token"
+
+    if datetime.now()>user["token_expiry"]:
+        return "Token Expired"
+
+    if request.method=="POST":
+        password=generate_password_hash(
+            request.form["password"]
+        )
+
+        cursor.execute("""
+        UPDATE users
+        SET password=%s,
+            reset_token=NULL,
+            token_expiry=NULL
+        WHERE id=%s
+        """,(password,user["id"]))
+
+        conn.commit()
+        flash("Password Updated")
+        return redirect("/login")
+
+    return render_template("reset_password.html")
 
 
 # ---------- REGISTER ----------
@@ -379,6 +497,7 @@ def register():
 def logout():
     session.clear()
     return redirect(url_for("login"))  
+
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False)

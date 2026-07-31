@@ -19,6 +19,12 @@
         <label for="password">Password</label>
         <input type="password" id="password" name="password" placeholder="Enter your password" required>
       </div>
+
+      <div class="forgot_password">
+          <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+      </div>
+      <br>
+
       <button type="submit" class="btn-primary btn-full">Login</button>
     </form>
 
